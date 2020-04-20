@@ -108,6 +108,23 @@ export default {
                 this.curProperty = null;
                 this.curMaterials = null;
             }
+        },
+        //查询构件名称
+        getProductName(guid,prodId)
+        {
+            let datas = this.dataMap.get(guid);
+            //命中
+            if(datas)
+            {
+                var productProp = datas[0].get(prodId);
+                if(productProp)
+                {
+                    var name = productProp.gens['构件名称'];
+                    return name;
+                }
+                
+            }
+            return '无';
         }
     },
     mounted() {

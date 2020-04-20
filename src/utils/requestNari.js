@@ -1,19 +1,19 @@
 //封装了axios工具类
 import axios from 'axios'
-
-
+import store from '@/store'
 //axios.defaults.withCredentials = true
 // create an axios instance
-const bimAxios = axios.create({
+const nariAxios = axios.create({
     //baseURL: store.state.uv.bimServer
     //timeout: 5000 // request timeout
 })
 
 // request interceptor
-bimAxios.interceptors.request.use(
+nariAxios.interceptors.request.use(
     //访问bim服务器增加token，访问网络爬虫攻击
     config => {
-        config.headers['Authorization']='bimi';
+        var token = store.state.token;
+       // config.headers['authtoken']= token;
         return config
     }, 
     error => {
@@ -23,7 +23,7 @@ bimAxios.interceptors.request.use(
 )
 
 // respone interceptor
-bimAxios.interceptors.response.use(
+nariAxios.interceptors.response.use(
    
     //拦截回应，根据code判断是返回myResponse.data，还是直接Promise.reject处理了
     response => {
@@ -34,4 +34,4 @@ bimAxios.interceptors.response.use(
         return Promise.reject(error)
     })
 
-export default bimAxios;
+export default nariAxios;

@@ -20,7 +20,33 @@
 					@click="showPropertiesPanel"
 				></el-button>
 			</el-tooltip>
-
+			<el-tooltip class="item" effect="dark" content="绑定测点" placement="top-start">
+				<el-button
+					size="medium"
+					type="primary"
+					icon="el-icon-setting"
+					circle
+					@click="showMeaBindingPanel"
+				></el-button>
+			</el-tooltip>
+            <el-tooltip class="item" effect="dark" content="定义移动构件" placement="top-start">
+				<el-button
+					size="medium"
+					type="primary"
+					icon="el-icon-rank"
+					circle
+					@click="showMoveProductPanel"
+				></el-button>
+			</el-tooltip>
+             <el-tooltip class="item" effect="dark" content="开启体量计算" placement="top-start">
+				<el-button
+					size="medium"
+					type="primary"
+					icon="el-icon-open"
+					circle
+					@click="showAreaPanel"
+				></el-button>
+			</el-tooltip>
 		</div>
         
         <div class="testDiv">
@@ -31,8 +57,15 @@
 		<bim-spatial ref="spatialPanel"></bim-spatial>
 		<!--构件属性-->
 		<bim-properties ref="propertiesPanel"></bim-properties>
-	
-		<div v-if="loading.waitCount !== 0" class="loading_bg"></div>
+		<!--测点绑定-->
+		<mea-binding ref="meaBinding" @submitBindMea="submitBindMea"></mea-binding>
+        <!--移动构件名单-->
+		<move-product ref="moveProduct" @submitAddMove="submitAddMove"></move-product>
+        <!--开启面积、体积计算-->
+		<area-caculate ref="areaCaculate"></area-caculate>
+
+        <!--进度-->
+		<div class=""  v-if="loading.waitCount !== 0" class="loading_bg"></div>
 		<div v-if="loading.waitCount !== 0" class="loading">
 			<el-steps :active="loading.progressStep" finish-status="success">
 				<el-step title="下载轻量化文件"></el-step>
@@ -48,40 +81,35 @@
 				<span style="font-size:14px">正在渲染三维模型,请稍后...</span>
 			</div>
 		</div>
+
 	</div>
 </template>
 
 <script>
-import { BimiViewer, ProductState } from "@/assets/js/bim/bim";
-import FlashPlugin from "@/assets/js/bim/plugins/FlashPlugin";
-import TipPlugin from "@/assets/js/bim/plugins/TipPlugin";
-import PointPlugin from "@/assets/js/bim/plugins/PointPlugin";
-import RoamingPlugin from "@/assets/js/bim/plugins/RoamingPlugin";
-import LabelPlugin from "@/assets/js/bim/plugins/LabelPlugin";
-import NavCube from "@/assets/js/bim/plugins/NavCubePlugin";
-import PathPlugin from "@/assets/js/bim/plugins/PathPlugin";
-import RectSelectionPlugin from "@/assets/js/bim/plugins/RectSelectionPlugin"
+import { BimiViewer, ProductState } from "@/assets/js/bim/bim"
+import NavCube from "@/assets/js/bim/plugins/NavCubePlugin"
 
-
-import viewerHelper from "@/utils/viewHelper";
-import BimSpatial from "@/components/bim/BimSpatial";
-import BimProperties from "@/components/bim/BimProperties";
-
-import MessageUtil from "@/utils/MessageUtil";
-
+import { Loading } from "element-ui"
+import viewerHelper from "@/utils/viewHelper"
+import BimSpatial from "@/components/bim/BimSpatial"
+import BimProperties from "@/components/bim/BimProperties"
+import MeaBinding from "@/components/bim/MeaBinding"
+import MoveProduct from "@/components/bim/MoveProducts"
+import AreaCaculate from "@/components/bim/AreaCaculate"
 
 import AuthHelp from "@/utils/auth"
 import { hexMd5 } from '@/utils/md5.js'
 import axios from 'axios'
 import request from '@/utils/request'
 
-
 export default {
-	name: "Home",
-	components: { BimSpatial, BimProperties },
+	name: "Edit",
+	components: { BimSpatial, BimProperties, MeaBinding ,MoveProduct,AreaCaculate},
 	data() {
 		return {
-			defaultBim: '冷站', //specail表中的个人默认bim
+            username: 'liduwei',
+            password: 'Nari@2008',//nari api 模拟用户
+            pickId:null, //当前选中的构件ID
 			modelId: -1,
 			loadedBims: new Map(), //已加载的bim，key是guid，value是model id
 			ifcNameCache: new Map(), //bim名称缓存,key是guid,value是ifc名称
@@ -155,7 +183,8 @@ export default {
 					viewer.resetStates();
 					viewer.zoomTo(id);
 					viewer.setCameraTarget(id);
-					viewer.setState(ProductState.HIGHLIGHTED, [id]);
+                    viewer.setState(ProductState.HIGHLIGHTED, [id]);
+                    this.pickId = id;
 				}
 			});
 
@@ -168,7 +197,7 @@ export default {
 					viewer.resetStates();
 					viewer.setState(ProductState.HIGHLIGHTED, [id]);
 					this.$refs.propertiesPanel.setCurProperty(guid, id);
-					this.$refs.extPropertiesPanel.setCurProperty(guid, id);
+                    this.pickId = id;
 				}
 			});
 		},
@@ -190,8 +219,7 @@ export default {
 		},
 		//加载默认模型的时候可能会一次加载多个bim
 		loadBim(guids) {
-			this.loading.downloadingCount = this.loading.waitCount =
-				guids.length;
+			this.loading.downloadingCount = this.loading.waitCount = guids.length;
 			this.loading.progressDatas.length = 0;
 			this.loading.progressStep = 0;
 			for (var i = 0; i < guids.length; i++) {
@@ -242,41 +270,6 @@ export default {
             {
                 let navCube = new NavCube();
                 viewer.addPlugin(navCube);
-                
-				let flashPlugin = new FlashPlugin();
-                viewer.addPlugin(flashPlugin);
-
-				let tipPlugin = new TipPlugin();
-                viewer.addPlugin(tipPlugin);
-
-                let labelPlugin = new LabelPlugin();
-                viewer.addPlugin(labelPlugin);
-
-                let rectSelection = new RectSelectionPlugin(function(data){
-                    console.info(data);
-                    viewer.setState(ProductState.HIGHLIGHTED,data);
-                });
-                viewer.addPlugin(rectSelection);
-	
-                
-				//构件顶点参数
-				// let vertices = new Float32Array([
-				//     //2000.0,-250.0,1500.0,
-				//     0,0,0,
-				//     4000, 500, 3000,
-				// ]);
-				// let ids = new Float32Array([
-				//     6000000, //ID通常设置的大一点，但不要超过8200005
-				//     6000001,
-				// ]);
-				// let colors = new Float32Array([
-				//     1.0,0.0,0.0,1.0,
-				//     0.0,0.0,1.0,1.0,
-				// ]);
-				// var pointPlugin = new PointPlugin({vertices:vertices,colors:colors,ids:ids});
-				// viewer.addPlugin(pointPlugin);
-
-				
 			}
 		},
 
@@ -293,12 +286,32 @@ export default {
 				.propertiesPanel.panel.visiable;
 			this.setPanelTop(this.$refs.propertiesPanel.panel);
 		},
-		//显示构件扩展属性面板
-		showExtPropertiesPanel() {
-			this.$refs.extPropertiesPanel.panel.visiable = !this.$refs
-				.extPropertiesPanel.panel.visiable;
-			this.setPanelTop(this.$refs.extPropertiesPanel.panel);
-		},
+		//显示测点绑定面板
+		showMeaBindingPanel() {
+			this.$refs.meaBinding.panel.visiable = !this.$refs
+				.meaBinding.panel.visiable;
+			this.setPanelTop(this.$refs.meaBinding.panel);
+        },
+        //显示移动构件名单面板
+        showMoveProductPanel(){
+            this.$refs.moveProduct.panel.visiable = !this.$refs
+				.moveProduct.panel.visiable;
+            this.setPanelTop(this.$refs.moveProduct.panel);
+            if(this.$refs.moveProduct.panel.visiable)
+            {
+                this.$refs.moveProduct.refreshData();
+            }
+        },
+        //显示面积体积计算
+        showAreaPanel(){
+            this.$refs.areaCaculate.panel.visiable = !this.$refs
+				.areaCaculate.panel.visiable;
+            this.setPanelTop(this.$refs.areaCaculate.panel);
+            if(this.$refs.areaCaculate.panel.visiable)
+            {
+                this.$refs.areaCaculate.refreshData();
+            }
+        },
 		//通过zindex让panel显示在最前位
 		setPanelTop(panel) {
 			if (panel.visiable) {
@@ -307,8 +320,73 @@ export default {
 				panel.zIndex = 2;
 			}
 		},
-    
-     
+        //MeaBinding部件传来的绑定测点事件
+        submitBindMea(node){
+            if(this.pickId == null)
+            {
+                this.$alert("当前三维场景中没有选中的构件，请先选中构件，再进行操作!", "错误", {
+					type: "error"
+                });
+                return;
+            }
+            var meaId = node.id;
+            var meaName = node.name;
+            var pickProductId = this.pickId;
+            var guid = viewerHelper.getViewer().getProductTag(pickProductId);
+            var productName = this.$refs.propertiesPanel.getProductName(guid,pickProductId);
+            //提交后台
+            if(meaId && pickProductId)
+            {
+                request.get('data/addMeaBind.action',{ params: { meaId:meaId,meaName:meaName,productId: pickProductId,productName:productName} }).then(json=>{
+                    if(json.count == 1)
+                    {
+                        //取消当前pick的构件
+                        this.pickId = null;
+                        viewerHelper.getViewer().resetStates();
+                        this.$notify({
+                            title: '消息',
+                            message: '构件测点绑定成功',
+                            type: 'success',
+                            duration:3000
+                        });
+                    }
+                })
+            }
+        },
+
+        submitAddMove(){
+            if(this.pickId == null)
+            {
+                this.$alert("当前三维场景中没有选中的构件，请先选中构件，再进行操作!", "错误", {
+					type: "error"
+                });
+                return;
+            }
+            var pickProductId = this.pickId;
+            var guid = viewerHelper.getViewer().getProductTag(pickProductId);
+            var productName = this.$refs.propertiesPanel.getProductName(guid,pickProductId);
+            //提交后台
+            if(pickProductId)
+            {
+                request.get('data/addMoveProduct.action',{ params: { productId: pickProductId,productName:productName} }).then(json=>{
+                    if(json.count == 1)
+                    {
+                        //取消当前pick的构件
+                        this.pickId = null;
+                        viewerHelper.getViewer().resetStates();
+                        this.$notify({
+                            title: '消息',
+                            message: '构件移动名单添加成功',
+                            type: 'success',
+                            duration:3000
+                        });
+                        //刷新构件清单表格
+                         this.$refs.moveProduct.refreshData();
+                    }
+                })
+            }
+        },
+
         test()
         {
             //视角当前数据
@@ -319,29 +397,58 @@ export default {
             console.info(orthogonalCamera);
         },
 
-        reciveMessage(){
-            window.addEventListener('message',function(event){
-                var message = event.data;
-                new MessageUtil().doMessage(message);
-            }, false);
-        },
-       
-        openSPDialog(){
-            top.postMessage('打开选点对话框', '*');
+        init(){
+            //登陆
+            var username = this.username;
+            var password = this.password;
+            var salt = AuthHelp.getRandom(48, 57)
+            var md5Secret = hexMd5(password + salt)
+            var bytes = AuthHelp.str2Byte(md5Secret)
+            bytes[0] = salt
+            var saltSecret = AuthHelp.byte2Str(bytes)
+            //var root =  process.env.VUE_APP_NARI_API_ROOT;
+            var root = this.$store.state.api;
+            axios.get(root+'/uv/uvaction/authLogin.action', { params: { username: username, password: saltSecret } }).then(res=>{
+                if(res.data)
+                {
+                    var token = res.data.data.token;
+                    this.$store.state.token = token;
+                    console.info('登陆成功,token='+this.$store.state.token);
+                    //登陆成功之后，才能加载测点树，此时有了token.
+                    this.$refs.meaBinding.authValidated = true;
+                }
+                else
+                {
+                    alert('验证接口调用失败');
+                }
+            })
         }
+
 	},
 	mounted() {
 		this.initView();
-		//加载ifc名称缓存
-		if (this.defaultBim && this.defaultBim !== "") {
-			let guids = this.defaultBim.split(";");
-			this.loadBim(guids);
-		}
+        //加载bim
+         request.get('data/config.action').then(json=>{
+            var defaultBims = json.defaultBims;
+            if (defaultBims && defaultBims !== "") 
+            {
+                let guids = defaultBims.split(";");
+                this.loadBim(guids);
+                
+            }
+            var api = json.api;
+            if(api)
+            {
+                this.$store.state.api = api;
+                this.init();
+            }
+        })
 
 		document.oncontextmenu = function() {
 			return false;
         };
-        this.reciveMessage();
+
+        
 	},
 	beforeDestroy() {
 		this.destroyView();
@@ -369,11 +476,11 @@ export default {
 }
 .toolbarDiv {
 	position: absolute;
-    /* background: #ffffff;  */
+    background: #ffffff; 
 	left: 50%;
 	bottom: 10px;
-	margin: 0px 0px 0px -70px; /*50%为自身尺寸的一半*/
-	width: 140px;
+	margin: 0px 0px 0px -120px; /*50%为自身尺寸的一半*/
+	width: 240px;
 }
 .loading_bg {
 	position: absolute;

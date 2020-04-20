@@ -5,6 +5,7 @@ import store from './store'
 
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
+import '@/assets/css/globe.css'
 Vue.use(ElementUI, { size: 'small'});
 
 //阻止浏览器控制台显示生产模式的消息
