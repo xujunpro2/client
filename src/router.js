@@ -9,10 +9,6 @@ export default new Router({
     {
       path: '/',
       component: ()=> import('@/views/Home'),
-    },
-    {
-        path: '/edit',
-        component: () => import('@/views/Edit'),
     }
   ]
 })
