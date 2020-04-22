@@ -1,13 +1,37 @@
+'use strict'
+const path = require('path')
+
+function resolve(dir) {
+  return path.join(__dirname, dir)
+}
 
 module.exports = {
-    publicPath: './', //bulid的时候用相对路径
-    outputDir: 'dist',
-    assetsDir: 'static',
-    productionSourceMap: false, //打包的时候不要生成map文件，map文件可用来追踪运行期错误，但也会导致代码泄露
-    //设置开发用web服务器
-    devServer: {
-        port: 8081,
-        open: false,
-        proxy: null
-    }
+  publicPath: './', //bulid的时候用相对路径
+  outputDir: 'dist',
+  assetsDir: 'static',
+  lintOnSave: false,
+  productionSourceMap: false,
+  devServer: {
+    port: 8081,
+    open: false,
+    proxy: null
+  },
+  chainWebpack(config) {
+    // set svg-sprite-loader
+    config.module
+      .rule('svg')
+      .exclude.add(resolve('src/icons'))
+      .end()
+    config.module
+      .rule('icons')
+      .test(/\.svg$/)
+      .include.add(resolve('src/icons'))
+      .end()
+      .use('svg-sprite-loader')
+      .loader('svg-sprite-loader')
+      .options({
+        symbolId: 'icon-[name]'
+      })
+      .end()
+  }
 }

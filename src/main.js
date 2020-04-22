@@ -1,7 +1,9 @@
 import Vue from 'vue'
 import App from './App.vue'  //./表示当前相对路径  @/表示src目录
 import router from './router'
-import store from './store'
+import store from './store/'
+
+import '@/icons' // svg icon
 
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
