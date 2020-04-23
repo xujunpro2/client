@@ -4,6 +4,21 @@
   </div>
 </template>
 
+<script>
+import redoundo from '@/mixins/redoundo'
+import { mapMutations } from 'vuex'
+export default {
+    name: 'app',
+    mixins: [redoundo],
+    mounted: function () {
+        this.initializeState()
+    },
+    methods: {
+        ...mapMutations(['initializeState']),
+    }
+}
+</script>
+
 <style lang="scss">
 
 

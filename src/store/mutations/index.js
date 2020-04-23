@@ -17,7 +17,7 @@ const mutations = {
    * Saves the initial state for the redo/undo functionality
    */
   initializeState: function (state) {
-    console.debug('Base state saved')
+    console.info('Base state saved')
   },
   ...appMutations,
   ...authMutations,
