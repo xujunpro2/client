@@ -1,6 +1,7 @@
 <template>
   <div class="mainegg">
     <stage v-if="selectedPage" :page="selectedPage" :zoom="zoom"></stage>
+    <zoom-menu @zoomChange="zoomHandler" :zoom="zoom" class="zoom-menu"></zoom-menu>
   </div>
 </template>
 
@@ -10,10 +11,11 @@ import { mapState, mapGetters, mapMutations } from 'vuex'
 import { _changeActivePage, _rebaseActivePage, _updateEditorZoom, getPageIndexById } from '@/store/types'
 
 import Stage from './Stage'
+import ZoomMenu from '@/components/editor/common/ZoomMenu'
 
 export default {
   name: 'mainegg',
-  components: { Stage },
+  components: { Stage ,ZoomMenu},
   created: function () {
     this.selectFallbackPage(this.selectedPage)
   },
@@ -51,7 +53,7 @@ export default {
 
 <style scoped>
 .mainegg {
-  margin: 0 57px;
+  margin: 0 57px; /*画布左右留白57px，但scale之后，右边留白消失了，目前还没有找到解决方法 */
   height: 100%;
 }
 
@@ -59,6 +61,6 @@ export default {
   bottom: 24px;
   left: 24px;
   padding: 0 6px;
-  position: fixed;
+  position: fixed; /*相对于浏览器的绝对定位 */
 }
 </style>

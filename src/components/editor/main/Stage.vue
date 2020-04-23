@@ -64,18 +64,19 @@ export default {
     }
   },
   computed: {
-    pageStyles () {
-      return {
-        ...this.page.styles,
-        height: (typeof this.page.height === 'string') ? this.page.height : (this.page.height + 'px'),
-        width: (typeof this.page.width === 'string') ? this.page.width : (this.page.width + 'px'),
-        transform: 'scale(' + this.zoom + ')'
-      }
+        //关注prop中绑定的state.app.selectedPage，实时生成pageStyle，并传递给MrContainer的style(css)
+        pageStyles () {
+        return {
+            ...this.page.styles,
+            height: (typeof this.page.height === 'string') ? this.page.height : (this.page.height + 'px'),
+            width: (typeof this.page.width === 'string') ? this.page.width : (this.page.width + 'px'),
+            transform: 'scale(' + this.zoom + ')'
+        }
     },
 
     ...mapState({
-      selectedElements: state => state.app.selectedElements || [],
-      projectComponents: state => state.project.components
+        selectedElements: state => state.app.selectedElements || [],
+        projectComponents: state => state.project.components
     })
   },
   methods: {
