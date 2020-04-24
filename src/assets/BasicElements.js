@@ -22,6 +22,16 @@ const basicElements = [
       'border-width': '1px'
     },
     'children': []
+  },
+  
+  // BUTTON
+  {
+    'name': 'button',
+    'type': 'button',
+    'text': 'Button',
+    'egglement': true,
+    'width': 200,
+    'height': 40
   }
 
   
