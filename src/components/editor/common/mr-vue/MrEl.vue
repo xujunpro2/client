@@ -137,7 +137,7 @@ export default {
   margin: 0;
   width: 100%;
   height: 100%;
-  position: absolute;
+  position: absolute; /** 图元包装器采用absolute，对应MrContainer */
   box-sizing: border-box;
 }
 

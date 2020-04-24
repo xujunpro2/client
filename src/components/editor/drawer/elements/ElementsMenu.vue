@@ -28,10 +28,11 @@ export default {
 	methods: {
 		//drag基础控件
 		dragstartBasicElementHandler(e, item) {
+            //这里drag,Stage负责接受drop /** @drop="dropHandler" */
 			e.dataTransfer.dropEffect = "copy";
 			e.dataTransfer.effectAllowed = "all";
 			var json = JSON.stringify(this.initItem(item));
-			e.dataTransfer.setData('text/plain', JSON.stringify(this.initItem(item)))
+            e.dataTransfer.setData('text/plain', JSON.stringify(this.initItem(item)));
 		},
 
 		initItem(item) {
