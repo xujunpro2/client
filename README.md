@@ -1,5 +1,5 @@
 # clent
-使用VUE的一个DND模型
+基于Vue的可视化组态工具
 
 ## Project setup
 ```
