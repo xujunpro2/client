@@ -5,7 +5,7 @@ import { _clearSelectedElements, _addSelectedElement } from "@/store/types";
 import MrEl from "@/components/editor/common/mr-vue/MrEl"
 import StageEl from "./StageEl"
 
-import ELButton from "@/cells/ELButton"
+
 
 export default {
 	name: "stage-el",
@@ -38,23 +38,11 @@ export default {
 			minHeight: elementO.minHeight
 		};
 
-			//创建MrEl
-			// stageElem = createElement(
-			// 	MrEl,
-			// 	{
-			// 		props: elementO.global
-			// 			? { ...mrElProps, handles: null }
-			// 			: mrElProps,
-			// 		on: { activated: this.activatedHandler }
-			// 	},
-			// 	[createElement('button',{attrs:{id: elementO.id}},'按钮')]
-            // );
-
         let stageElem = createElement(MrEl,{
 			    props: elementO.global? { ...mrElProps, handles: null }: mrElProps,
 				on: { activated: this.activatedHandler }
 			},
-			[createElement(ELButton,{attrs:{id: elementO.id}})]
+            [createElement('cell-button',{attrs:{id: elementO.id}})]
         );
 
 			// stageElem = createElement(MrEl, {
