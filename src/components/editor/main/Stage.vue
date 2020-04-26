@@ -1,5 +1,6 @@
 <template>
 	<mr-container
+        ref = "mrContainer"
 		:id="page.id"
 		:zoom="zoom"
 		:style="pageStyles"
@@ -366,7 +367,27 @@ export default {
 			isDroppable
 				? document.documentElement.classList.add("droppable")
 				: document.documentElement.classList.remove("droppable");
-		},
+        },
+        //查找图元对象
+        findCell(cellId){
+            var cell = null;
+            //Stage的$children[0]是<mr-container>，MrContainer的$children是一个个的StageEL
+            //每个StageEL又包裹了一个MrEl，而最终的图元就藏在MrEL中
+            var stageEls = this.$children[0].$children; //所有的mr
+            for(let i=0;i<stageEls.length;i++)
+            {
+                let stageEl = stageEls[i];
+                 //每个StageEl都有一个自定义的prop:elem ,这个elem就是store中的page.child中的图元模型对象
+                if(stageEl.elem.id === cellId)
+                {
+                    let cellRef = stageEl.$refs[cellId] //通过ref直接在StageEl中查找到该图元vuecomponent，图元的ref也统一使用id
+                    cell = cellRef;
+                    break;
+                }     
+            }
+            return cell;
+            //this.$refs.mrContainer.getCellComponent();
+        },
 
 		...mapActions([
 			rebaseSelectedElements,

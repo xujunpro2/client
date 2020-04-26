@@ -37,14 +37,16 @@ export default {
 			minWidth: elementO.minWidth,
 			minHeight: elementO.minHeight
 		};
-
+        //MrEl的mousedown事件触发activated,绑定这里的activatedHandler(),用于选中操作
         let stageElem = createElement(MrEl,{
 			    props: elementO.global? { ...mrElProps, handles: null }: mrElProps,
 				on: { activated: this.activatedHandler }
-			},
-            [createElement('cell-button',{attrs:{id: elementO.id}})]
+            },
+            //专门添加一个ref引用，为了能在StageEL中通过$refs快速查找到图元的VueComponent对象
+            [createElement('cell-button',{ref: elementO.id,attrs:{id: elementO.id}})]
         );
 
+        console.info('创建的图元id:'+elementO.id)
 			// stageElem = createElement(MrEl, {
 			//     'props': (elementO.global) ? {...mrElProps, handles: null} : mrElProps,
 			//     'on': { activated: this.activatedHandler }
@@ -78,10 +80,14 @@ export default {
 		activatedHandler(e) {
 			e.stopPropagation();
 			e.preventDefault();
-
-			if (e.shiftKey && !this.isActive) {
+            //按住shift键，那么连续选中
+            if (e.shiftKey && !this.isActive) 
+            {
 				this._addSelectedElement(this.elem);
-			} else if (!e.shiftKey && !this.isActive) {
+            } 
+            //没有按住shift键，先清空之前选中的
+            else if (!e.shiftKey && !this.isActive) 
+            {
 				this._clearSelectedElements();
 				this._addSelectedElement(this.elem);
 			}

@@ -1,6 +1,7 @@
 <template>
 	<div class="mainegg">
-		<stage v-if="selectedPage" :page="selectedPage" :zoom="zoom"></stage>
+        <el-button @click="test">Test</el-button>
+		<stage ref="stage" v-if="selectedPage" :page="selectedPage" :zoom="zoom"></stage>
 		<zoom-menu @zoomChange="zoomHandler" :zoom="zoom" class="zoom-menu"></zoom-menu>
 	</div>
 </template>
@@ -61,7 +62,21 @@ export default {
 			_changeActivePage,
 			_rebaseActivePage,
 			_updateEditorZoom
-		])
+        ]),
+        test(){
+            //获得当前选中的图元
+            let selectedElements = this.$store.state.app.selectedElements;
+            if(selectedElements.length > 0)
+            {
+                let cellId = selectedElements[0].id;
+                var cell = this.$refs.stage.findCell(cellId);
+                if(cell)
+                {
+                    cell.doSetting();
+                }
+            }
+           
+        }
 	}
 };
 </script>

@@ -314,6 +314,13 @@ export default {
         left: parseInt(this.$refs.selectionArea.style.left),
         right: parseInt(this.$refs.selectionArea.style.width) + parseInt(this.$refs.selectionArea.style.left)
       }
+    },
+
+    //获得图元VUE对象
+    getCellComponent(){
+        
+
+        alert('getCellComponent');
     }
   }
 }
