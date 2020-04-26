@@ -12,21 +12,11 @@ export default {
 	props: ["elem", "isPlain"],
 	components: { MrEl },
 	render: function(createElement) {
-		let elementO = this.elem.global? { ...this.elem, ...this.componentRef, id: this.elem.id }: this.elem;
-		const data = {
-			attrs: {
-				id: elementO.id,
-				"data-global": elementO.global,
-				"data-egglement": elementO.egglement,
-				"data-containegg": elementO.containegg,
-				"data-componegg": elementO.componegg,
-				"data-wrappegg": elementO.wrappegg,
-				...elementO.attrs
-			}
-		};
+		let elementO = this.elem;
 
+        //根据图元配置文件中的数据，生成初始化必须的属性对象
         let mrElProps = {
-			active: this.isActive,
+			active: this.isActive, 
 			left: elementO.left,
 			top: elementO.top,
 			right: elementO.right,
@@ -39,19 +29,12 @@ export default {
 		};
         //MrEl的mousedown事件触发activated,绑定这里的activatedHandler(),用于选中操作
         let stageElem = createElement(MrEl,{
-			    props: elementO.global? { ...mrElProps, handles: null }: mrElProps,
+			    props: mrElProps,
 				on: { activated: this.activatedHandler }
             },
             //专门添加一个ref引用，为了能在StageEL中通过$refs快速查找到图元的VueComponent对象
             [createElement('cell-button',{ref: elementO.id,attrs:{id: elementO.id}})]
         );
-
-        console.info('创建的图元id:'+elementO.id)
-			// stageElem = createElement(MrEl, {
-			//     'props': (elementO.global) ? {...mrElProps, handles: null} : mrElProps,
-			//     'on': { activated: this.activatedHandler }
-			// }, [ createElement(elementO.type, data2, children) ])
-
 		return stageElem;
 	},
 	computed: {

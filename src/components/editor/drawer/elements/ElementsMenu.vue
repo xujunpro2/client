@@ -2,7 +2,7 @@
     <div class="menus-wrapper">
         <menu-toggle menuHeader="Basic">
             <div class="cell-menu">
-                <div class="cell-menu__el" :key="element.name" v-for="element in basicElements" :title="element.name"
+                <div class="cell-menu__el" :key="element.name" v-for="element in basicElements" :title="element.tooltip"
                     draggable="true" @dragstart="dragstartBasicElementHandler($event, element)">
                     <svg-icon :icon-class="element.name" style="font-size: 24px;  color: rgba(0,0,0,.87)" />
                     <span>{{element.displayName || element.name}}</span>

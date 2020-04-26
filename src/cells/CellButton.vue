@@ -1,5 +1,5 @@
 <template>
-	<el-button >我是ElementUI的按钮</el-button>
+	<el-button>按钮</el-button>
 </template>
 
 
