@@ -137,6 +137,7 @@ export default {
             {
                 let el = selectedElements[0];
                 this.updateEgglement({egglement:el,zIndex:this.selectedPage.min_zIndex})
+                //记得更新min
                 this.updatePage({page:this.selectedPage,min_zIndex:this.selectedPage.min_zIndex-1})
             }
             this.contextMenuVisible = false;
