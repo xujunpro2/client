@@ -54,33 +54,46 @@ export default {
     }
   },
   computed: {
-    mrElements () {
-      return this.activeElements.map(el => document.getElementById(el.id).parentElement)
-    }
+        //获得选中图元的包装器MrEl对应的dom对象
+        mrElements () 
+        {
+            return this.activeElements.map(el => document.getElementById(el.id).parentElement)
+        }
   },
   methods: {
     mouseDownHandler (e) {
-      let isMrs = false
-      this.initialAbsPos = this.currentAbsPos = this.getMouseAbsPoint(e)
-      this.initialRelPos = this.currentRelPos = this.getMouseRelPoint(e)
+        //如果是鼠标左键按下，才处理，这样避免右键菜单时，清除了图元选中状态
+        if(e.button === 0)
+        {
+                let isMrs = false
+                this.initialAbsPos = this.currentAbsPos = this.getMouseAbsPoint(e)
+                this.initialRelPos = this.currentRelPos = this.getMouseRelPoint(e)
+                //如果事件源是MrContainer，鼠标左键按下，先清除选中，然后开启框选
+                if (e.target.dataset.mrContainer) 
+                {
+                    this.$emit('clearselection')
+                    this.renderSelectionArea({x: -1, y: -1}, {x: -1, y: -1})
+                    isMrs = this.selecting = true
+                } 
+                //这个目前不知道有什么作用
+                else if (e.target.dataset.mrHandle) 
+                {
+                    isMrs = this.resizing = true
+                    this.handle = e.target.classList[1]
+                    // this.$emit('resizestart')
+                } 
+                else if (this.getParentMr(e.target)) 
+                {
+                    isMrs = this.moving = true
+                    // this.$emit('movestart')
+                }
 
-      if (e.target.dataset.mrContainer) {
-        this.$emit('clearselection')
-        this.renderSelectionArea({x: -1, y: -1}, {x: -1, y: -1})
-        isMrs = this.selecting = true
-      } else if (e.target.dataset.mrHandle) {
-        isMrs = this.resizing = true
-        this.handle = e.target.classList[1]
-        // this.$emit('resizestart')
-      } else if (this.getParentMr(e.target)) {
-        isMrs = this.moving = true
-        // this.$emit('movestart')
-      }
-
-      if (isMrs) {
-        document.documentElement.addEventListener('mousemove', this.mouseMoveHandler, true)
-        document.documentElement.addEventListener('mouseup', this.mouseUpHandler, true)
-      }
+                if (isMrs) {
+                    document.documentElement.addEventListener('mousemove', this.mouseMoveHandler, true)
+                    document.documentElement.addEventListener('mouseup', this.mouseUpHandler, true)
+                }
+        }
+ 
     },
 
     mouseUpHandler (e) {
@@ -314,13 +327,6 @@ export default {
         left: parseInt(this.$refs.selectionArea.style.left),
         right: parseInt(this.$refs.selectionArea.style.width) + parseInt(this.$refs.selectionArea.style.left)
       }
-    },
-
-    //获得图元VUE对象
-    getCellComponent(){
-        
-
-        alert('getCellComponent');
     }
   }
 }

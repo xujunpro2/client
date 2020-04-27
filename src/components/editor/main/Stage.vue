@@ -47,6 +47,7 @@ import {
 import MrContainer from "@/components/editor/common/mr-vue/MrContainer";
 import StageEl from "./StageEl";
 
+
 const DROP_BORDER = {
 	width: "2px",
 	style: "solid",
@@ -136,6 +137,8 @@ export default {
 		},
 
 		dropHandler(e) {
+            var id = this.page.id;
+            console.info(id);
 			const mainContainer = document.getElementById("main");
 			let element = JSON.parse(e.dataTransfer.getData("text/plain"));
 

@@ -25,6 +25,8 @@ const commonPageMutations = {
     if ((typeof payload.path !== 'undefined') && (payload.path !== null)) payload.page.path = payload.path
     if ((typeof payload.height !== 'undefined') && (payload.height !== null)) payload.page.height = payload.height
     if ((typeof payload.width !== 'undefined') && (payload.width !== null)) payload.page.width = payload.width
+    if ((typeof payload.max_zIndex !== 'undefined') && (payload.max_zIndex !== null)) payload.page.max_zIndex = payload.max_zIndex
+    if ((typeof payload.min_zIndex !== 'undefined') && (payload.min_zIndex !== null)) payload.page.min_zIndex = payload.min_zIndex
     if (payload.styles) payload.page.styles = payload.styles
   },
 

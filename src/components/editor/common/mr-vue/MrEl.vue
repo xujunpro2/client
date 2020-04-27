@@ -88,11 +88,8 @@ export default {
 			}
 		},
 		zIndex: {
-			type: [String, Number],
-			default: "auto",
-			validator: function(val) {
-				return typeof val === "string" ? val === "auto" : val >= 0;
-			}
+			type: [Number],
+			default: 0
 		},
 		handles: {
 			type: Array,

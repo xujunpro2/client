@@ -10,6 +10,7 @@ import 'element-ui/lib/theme-chalk/index.css';
 import '@/assets/css/globe.css'
 Vue.use(ElementUI, { size: 'small'});
 
+
 //全局引用自定义图元
 import cells from '@/cells/index'
 Vue.use(cells)

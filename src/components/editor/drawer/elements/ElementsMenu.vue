@@ -37,7 +37,7 @@ export default {
 
 		initItem(item) {
 			return {
-				zIndex: "auto",
+				zIndex: 0,
 				top: 0,
 				left: 0,
 				bottom: "auto",

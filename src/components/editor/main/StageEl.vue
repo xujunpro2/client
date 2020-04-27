@@ -33,8 +33,9 @@ export default {
 				on: { activated: this.activatedHandler }
             },
             //专门添加一个ref引用，为了能在StageEL中通过$refs快速查找到图元的VueComponent对象
-            [createElement('cell-button',{ref: elementO.id,attrs:{id: elementO.id}})]
+            [createElement(elementO.name,{ref: elementO.id,attrs:{id: elementO.id}})]
         );
+        // console.info('创建的图元id:'+elementO.id);
 		return stageElem;
 	},
 	computed: {

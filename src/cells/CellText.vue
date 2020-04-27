@@ -1,5 +1,5 @@
 <template>
-	<el-button>按钮</el-button>
+	<el-input placeholder="请输入内容"></el-input>
 </template>
 
 
@@ -9,7 +9,7 @@ export default {
     name: "elbutton",
     methods: {
         doSetting(){
-            alert('Button doSetting()')
+            alert('Text doSetting()')
         }
     }
 };

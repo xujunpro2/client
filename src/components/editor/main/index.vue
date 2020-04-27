@@ -3,6 +3,19 @@
         <el-button @click="test">Test</el-button>
 		<stage ref="stage" v-if="selectedPage" :page="selectedPage" :zoom="zoom"></stage>
 		<zoom-menu @zoomChange="zoomHandler" :zoom="zoom" class="zoom-menu"></zoom-menu>
+        <context-menu 
+            :target="contextMenuTarget" 
+            :show="contextMenuVisible" 
+            @update:show="(show) => contextMenuVisible = show">
+           
+           
+            <a href="#" @click="upCell"><i class="el-icon-top"></i>&nbsp;上移</a>
+            <a href="#" @click="downCell"><i class="el-icon-bottom"></i>&nbsp;下移</a>
+            <a href="#" @click="topCell"><i class="el-icon-upload2"></i>&nbsp;置顶</a>
+            <a href="#" @click="bottomCell"><i class="el-icon-download"></i>&nbsp;置底</a>
+            <div class="cmenu-divider"></div>
+              <a href="#" @click="test"><i class="el-icon-setting"></i>&nbsp;属性设置</a>
+        </context-menu>
 	</div>
 </template>
 
@@ -13,15 +26,24 @@ import {
 	_changeActivePage,
 	_rebaseActivePage,
 	_updateEditorZoom,
-	getPageIndexById
+    getPageIndexById,
+    updateEgglement,
+    updatePage
 } from "@/store/types";
 
 import Stage from "./Stage";
 import ZoomMenu from "@/components/editor/common/ZoomMenu";
+import ContextMenu from "@/components/editor/context-menu/VueContextMenu"
 
 export default {
 	name: "mainegg",
-	components: { Stage, ZoomMenu },
+    components: { Stage, ZoomMenu,ContextMenu},
+    data () {
+        return {
+            contextMenuTarget: null,
+            contextMenuVisible: false,
+        }
+    },
 	created: function() {
 		this.selectFallbackPage(this.selectedPage);
 	},
@@ -37,7 +59,8 @@ export default {
 			pages: state => (state ? state.project.pages : []),
 			zoom: state => state.app.editorZoom
 		}),
-		...mapGetters([getPageIndexById])
+        ...mapGetters([getPageIndexById])        
+         
 	},
 	watch: {
 		// After a redo/undo action this will apply
@@ -46,6 +69,7 @@ export default {
 		}
 	},
 	methods: {
+        
 		selectFallbackPage(page) {
 			if (!page && this.pages.length > 0) {
 				this._changeActivePage(this.pages[0]);
@@ -61,8 +85,62 @@ export default {
 		...mapMutations([
 			_changeActivePage,
 			_rebaseActivePage,
-			_updateEditorZoom
+            _updateEditorZoom,
+            updateEgglement,
+            updatePage
         ]),
+        //图元上移一位
+        upCell(){
+            let selectedElements = this.$store.state.app.selectedElements;
+            if(selectedElements.length > 0)
+            {
+                let el = selectedElements[0];
+                let newIndex = Number(el.zIndex) + 1;
+                this.updateEgglement({egglement:el,zIndex:newIndex})
+                //修改max_zIndex
+                if(newIndex >= this.selectedPage.max_zIndex)
+                {
+                    this.updatePage({page:this.selectedPage,max_zIndex:this.selectedPage.max_zIndex+1})
+                }
+                this.contextMenuVisible = false;
+            }
+        },
+        downCell(){
+            let selectedElements = this.$store.state.app.selectedElements;
+            if(selectedElements.length > 0)
+            {
+                let el = selectedElements[0];
+                let newIndex = Number(el.zIndex) - 1;
+                this.updateEgglement({egglement:el,zIndex:newIndex})
+                //修改min_zIndex
+                if(newIndex <= this.selectedPage.min_zIndex)
+                {
+                    this.updatePage({page:this.selectedPage,min_zIndex:this.selectedPage.min_zIndex-1})
+                }
+                this.contextMenuVisible = false;
+            }
+        },
+        topCell(){
+            let selectedElements = this.$store.state.app.selectedElements;
+            if(selectedElements.length > 0)
+            {
+                let el = selectedElements[0];
+                this.updateEgglement({egglement:el,zIndex:this.selectedPage.max_zIndex})
+                //记得更新max
+                this.updatePage({page:this.selectedPage,max_zIndex:this.selectedPage.max_zIndex+1})
+            }
+            this.contextMenuVisible = false;
+        },
+        bottomCell(){
+            let selectedElements = this.$store.state.app.selectedElements;
+            if(selectedElements.length > 0)
+            {
+                let el = selectedElements[0];
+                this.updateEgglement({egglement:el,zIndex:this.selectedPage.min_zIndex})
+                this.updatePage({page:this.selectedPage,min_zIndex:this.selectedPage.min_zIndex-1})
+            }
+            this.contextMenuVisible = false;
+        },
         test(){
             //获得当前选中的图元
             let selectedElements = this.$store.state.app.selectedElements;
@@ -72,12 +150,18 @@ export default {
                 var cell = this.$refs.stage.findCell(cellId);
                 if(cell)
                 {
-                    cell.doSetting();
+                   cell.doSetting();
                 }
             }
-           
+            this.contextMenuVisible = false;
         }
-	}
+    },
+    mounted: function () {
+        //设置右键菜单的target dom
+        var pageId = this.selectedPage.id;
+       // console.info(pageId);
+        this.contextMenuTarget = document.getElementById(pageId);
+    },
 };
 </script>
 
@@ -93,4 +177,13 @@ export default {
 	padding: 0 6px;
 	position: fixed; /*相对于浏览器的绝对定位 */
 }
+
+.cmenu-divider {
+    background-color: #DCDFE6;
+    position: relative;
+    display: block;
+    height: 1px;
+    width: 100%;
+}
+
 </style>
